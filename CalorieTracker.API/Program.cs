@@ -41,12 +41,11 @@ builder.Services.AddCors(options =>
                 policy.WithOrigins("http://localhost:4200") // Angular development server
                       .AllowAnyHeader()
                       .AllowAnyMethod();
-            }
-            else
+            }            else
             {
                 // Production CORS - replace with your actual frontend domain
                 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
-                    ?? new[] { "https://calorietracker-frontend.onrender.com/" };
+                    ?? new[] { "https://calorietracker-frontend.onrender.com" };
                 
                 policy.WithOrigins(allowedOrigins)
                       .AllowAnyHeader()
