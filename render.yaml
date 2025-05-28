@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: calorietracker-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /swagger
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:10000
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=/app/data/calorietracker.db
+    disk:
+      name: calorietracker-data
+      mountPath: /app/data
+      sizeGB: 1

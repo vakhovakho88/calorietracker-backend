@@ -1,0 +1,56 @@
+# .dockerignore for CalorieTracker.API
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Logs
+**/*.log
+
+# Database files (will be created in container)
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Temporary files
+**/tmp/
+**/temp/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Test files
+**/*test*/
+**/*Test*/
+
+# Coverage reports
+**/coverage/
+
+# Node modules (if any)
+**/node_modules/
+
+# Package files
+**/*.nupkg

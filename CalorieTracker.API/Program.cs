@@ -36,9 +36,23 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngularFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200") // Angular development server
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
+            if (builder.Environment.IsDevelopment())
+            {
+                policy.WithOrigins("http://localhost:4200") // Angular development server
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            }
+            else
+            {
+                // Production CORS - replace with your actual frontend domain
+                var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
+                    ?? new[] { "https://calorietracker-frontend.onrender.com/" };
+                
+                policy.WithOrigins(allowedOrigins)
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            }
         });
 });
 
@@ -89,33 +103,33 @@ if (app.Environment.IsDevelopment())
         // Set Swagger UI as the startup page
         options.RoutePrefix = string.Empty;
     });
-
-    // Create the database if it doesn't exist and seed initial data
-    using (var scope = app.Services.CreateScope())
-    {
-        var services = scope.ServiceProvider;
-        try
-        {
-            var dbContext = services.GetRequiredService<ApplicationDbContext>();
-            
-            // Only create if it doesn't exist (no EnsureDeleted)
-            dbContext.Database.EnsureCreated();
-            
-            // Seed the database with initial data if empty
-            DataSeeder.SeedDataAsync(dbContext).Wait();
-        }
-        catch (Exception ex)
-        {
-            var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "An error occurred while initializing the database.");
-        }
-    }
 }
 else
 {
     // Use exception handler middleware in production
     app.UseExceptionHandler("/error");
     app.UseHsts();
+}
+
+// Initialize database for both development and production
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var dbContext = services.GetRequiredService<ApplicationDbContext>();
+        
+        // Create the database if it doesn't exist
+        dbContext.Database.EnsureCreated();
+        
+        // Seed the database with initial data if empty
+        await DataSeeder.SeedDataAsync(dbContext);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while initializing the database.");
+    }
 }
 
 // Only use HTTPS redirection if not in development
@@ -132,4 +146,4 @@ app.UseAuthorization();
 // Map controllers
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
